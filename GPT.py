@@ -1,8 +1,8 @@
 import openai
-openai.api_key = "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"
+openai.api_key = "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"
 
 
-def get_completion_from_messages(messages, model="gpt-3.5-turbo", temperature=0):
+def get_completion_from_messages(messages, model="gpt-3.5-turbo", temperature=1):
     response = openai.ChatCompletion.create(
         model=model,
         messages=messages,
