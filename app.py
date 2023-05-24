@@ -5,23 +5,23 @@ from config import MAX_SIZE, words
 from flask import Flask, request, jsonify
 import random
 import threading
+import os
+
+os.environ['FLASK_RUN_HOST'] = '10.41.250.47'
+os.environ['FLASK_RUN_PORT'] = '9090'
+
 app = Flask(__name__)
 
 # todo：修改为字典
 context_dict = dict()
-words = "adequate;administrator;ally;anniversary;boundary"
-
+words = ['adequate', 'administrator', 'ally', 'anniversary', 'boundary']
 
 
 @app.route('/ask', methods=['POST', 'GET'])
-# @app.route('http://10.41.136.250/ask', methods=['POST'])
+# @app.route('http://10.41.136.250/ask', methods=['POST','GET'])
 def ai_teacher():  # put application's code here
-    # print("asdasda")
-    # return 'dsada'
     try:
-
         token = request.headers.get('token')
-        print(token)
         # if token is None:
         #     token = str(random.randrange(10000000,99999999,1))
         #     context_queue = deque()
@@ -42,9 +42,10 @@ def ai_teacher():  # put application's code here
         #     })
         history_queue = context_dict[token]
         user_text = request.json.get('ask')
-        print(user_text)
-        t1 = Thread1(history_queue, user_text,event=event)
-        t2 = Thread2(user_text,event=event)
+        event = threading.Event()
+        print(event)
+        t1 = Thread1(history_queue, user_text, event=event)
+        t2 = Thread2(user_text, event=event)
 
         t1.start()
         t2.start()
@@ -104,7 +105,7 @@ def ai_word():
         })
 
     # 第二轮单词
-    newwords = 'conspicuous;intricate;complicated;subliminal;assistance'
+    newwords = ['conspicuous', 'intricate', 'complicated', 'subliminal', 'assistance']
     context_queue = deque()
     context_queue.append({'role': 'system', 'content': f""" 你是一位友好主动的英语教师，我是一位英语学习者。\
                           现在请你扮演 "teacher "的角色，我将扮演 "student "的角色。\
@@ -124,5 +125,4 @@ def ai_word():
 
 
 if __name__ == '__main__':
-    event = threading.Event()
-    app.run('127.0.0.1', '9090')
+    app.run(host='10.41.250.47', port=9090)
