@@ -7,7 +7,7 @@ import random
 import threading
 import os
 
-os.environ['FLASK_RUN_HOST'] = '10.41.250.47'
+os.environ['FLASK_RUN_HOST'] = '23.251.61.213'
 os.environ['FLASK_RUN_PORT'] = '9090'
 
 app = Flask(__name__)
@@ -87,14 +87,11 @@ def ai_word():
     if token is None:
         token = str(random.randrange(10000000, 99999999, 1))
         context_queue = deque()
-        context_queue.append({'role': 'system', 'content': f""" 你是一位友好主动的英语教师，我是一位英语学习者。\
-                      现在请你扮演 "teacher "的角色，我将扮演 "student "的角色。\
-                      让我们开始用英语聊天，你应该主动与学生互动。\
-                      请设置上下文的对话，这样我就能更容易地理解和记住这些单词。\
-                      我们将进行多轮对话，每轮只需要教学生一个单词，这样他就能更好地理解。\
-                      你一次只应该展示一轮对话中teacher的句子，其他的不要输出。现在让我们以下面这句话开始： \
-                      "student: Hello teacher, today I want to learn these word :{words}。\
-                      "请在句子中突出你想学的单词,记住你只能说英文,在你的每一次对话的最后你都需要让学生用这个单词写一个句子，记住你只说teacher的句子。 记住你只说teacher的句子"""})
+        context_queue.append({'role': 'system', 'content': f""" 你是一位有丰富教学经验的英语教师，我是一位英语学习者。现在请你扮演 "teacher "的角色。让我们开始用英语聊天，你应该主动与学生互动。
+单词列表:{words}
+你的任务是教学生学会单词列表中的每一个单词。你必须主动抽取单词列表中的单词给学生学习，并深入解释单词的含义，每次抽取一个单词教学，这样他就能更好地理解。你非常善于举例说明，并在每次回复后让学生用这个单词写一个句子，在学生没有用词造句的情况下不得切换下一个单词。
+No matter what language I use.Reply me in English.现在请从第一个单词教学。
+"""})
         context_dict[token] = context_queue
         return jsonify({
             "code": 0,
@@ -125,4 +122,4 @@ def ai_word():
 
 
 if __name__ == '__main__':
-    app.run(host='10.41.250.47', port=9090)
+    app.run(host='0.0.0.0', port=9090)
