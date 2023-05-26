@@ -14,9 +14,9 @@ class Thread1(threading.Thread):
 
     def run(self):
         chatbot = ChatBot(self.context_queue, self.user_text,self.event)
-        for result, queue in chatbot.chat_bot():
-            self.result = result
-            self.queue = queue
-        # self.result,self.queue = chatbot.chat_bot()
+        # for result, queue in chatbot.chat_bot():
+        #     self.result = result
+        #     self.queue = queue
+        self.result,self.queue = chatbot.chat_bot()
         # if self.result:
         #     self.result = list(self.result)  # 使用了list函数将生成器的所有结果保存为一个列表。
