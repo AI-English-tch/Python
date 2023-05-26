@@ -1,4 +1,3 @@
-from GPT import get_completion_from_messages
 from thread1 import Thread1
 from thread2 import Thread2
 from collections import deque
@@ -8,8 +7,8 @@ import random
 import threading
 import os
 
-# os.environ['FLASK_RUN_HOST'] = '23.251.61.213'
-# os.environ['FLASK_RUN_PORT'] = '9090'
+os.environ['FLASK_RUN_HOST'] = '23.251.61.213'
+os.environ['FLASK_RUN_PORT'] = '9090'
 
 app = Flask(__name__)
 
@@ -35,6 +34,7 @@ word_list = [
 
 
 @app.route('/ask', methods=['POST', 'GET'])
+# @app.route('http://10.41.136.250/ask', methods=['POST','GET'])
 def ai_teacher():  # put application's code here
     try:
         token = request.headers.get('token')
@@ -70,10 +70,6 @@ def ai_teacher():  # put application's code here
         chat_bot_response = t1.result
         context_dict[token] = t1.queue
         assistant_bot_response = t2.result
-        global assistant_bot_current
-        assistant_bot_current = assistant_bot_response
-
-
         # # 前端传输机器人和用户发的言
         # history_queue.append({'role': 'assistant', 'content': f"{chat_bot_response}"})
         # history_queue.append({'role': 'user', 'content': f"{user_text}"})
@@ -192,6 +188,6 @@ if __name__ == '__main__':
 
     event = threading.Event()
 
-    app.run('127.0.0.1', '9090')
+    # app.run('127.0.0.1', '9090')
 
-    # app.run(host='0.0.0.0', port=9090)
+    app.run(host='0.0.0.0', port=9090)
