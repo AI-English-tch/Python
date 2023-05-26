@@ -7,7 +7,7 @@ from flask import Flask, request, jsonify, Response
 import random
 import threading
 import os
-
+import tts
 # os.environ['FLASK_RUN_HOST'] = '23.251.61.213'
 # os.environ['FLASK_RUN_PORT'] = '9090'
 
@@ -39,24 +39,7 @@ word_list = [
 def ai_teacher():  # put application's code here
     try:
         token = request.headers.get('token')
-        # if token is None:
-        #     token = str(random.randrange(10000000,99999999,1))
-        #     context_queue = deque()
-        #     context_queue.append({'role': 'system', 'content': f""" 你是一位友好主动的英语教师，我是一位英语学习者。\
-        #           现在请你扮演 "teacher "的角色，我将扮演 "student "的角色。\
-        #           让我们开始用英语聊天，你应该主动与学生互动。\
-        #           请设置上下文的对话，这样我就能更容易地理解和记住这些单词。\
-        #           我们将进行多轮对话，每轮只需要教学生一个单词，这样他就能更好地理解。\
-        #           你一次只应该展示一轮对话中teacher的句子，其他的不要输出。现在让我们以下面这句话开始： \
-        #           "student: Hello teacher, today I want to learn these word :{words}。\
-        #           "请在句子中突出你想学的单词,记住你只能说英文,在你的每一次对话的最后你都需要让学生用这个单词写一个句子，记住你只说teacher的句子。 记住你只说teacher的句子"""})
-        #     context_dict[token] = context_queue
-        #     return jsonify({
-        #         "code": 0,
-        #         "data": {
-        #             "token": token
-        #         },
-        #     })
+
         history_queue = context_dict[token]
         user_text = request.json.get('ask')
         t1 = Thread1(history_queue, user_text, event=event)
@@ -69,6 +52,7 @@ def ai_teacher():  # put application's code here
         t2.join()
 
         chat_bot_response = t1.result
+        tts.text_to_audio(text=chat_bot_response)
         context_dict[token] = t1.queue
         assistant_bot_response = t2.result
         # # 前端传输机器人和用户发的言
@@ -120,12 +104,12 @@ def ai_word():
         context_queue.append({'role': 'system', 'content': f""" 你是一位有丰富教学经验的英语教师，我是一位英语学习者。现在请你扮演 "teacher "的角色。让我们开始用英语聊天，你应该主动与学生互动。
 单词列表:{words}
 你的任务是教学生学会单词列表中的每一个单词。你必须主动抽取单词列表中的单词给学生学习，并深入解释单词的含义，每次抽取一个单词教学，这样他就能更好地理解。你非常善于举例说明，并在每次回复后让学生用这个单词写一个句子，在学生没有用词造句的情况下不得切换下一个单词。
-在教学过程中，你需要用以下三引号内格式回复:
+在教学过程中，你需要用以下三引号内格式回复并且换行之前末尾加上分号:
 '''
-Word:
-Part of speech:
-explanation:
-Example sentence:
+Word: 你所回答的问题 ;
+Part of speech: 你所回答的问题 ;
+explanation: 你所回答的问题 ;
+Example sentence: 你所回答的问题 ;
 can you give me a sentence use <word>
 '''
 No matter what language I use.Reply me in English.现在请从第一个单词教学。
