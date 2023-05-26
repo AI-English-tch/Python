@@ -1,5 +1,5 @@
 import openai
-openai.api_key = "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"
+openai.api_key = "******"
 
 
 def get_completion_from_messages(messages, model="gpt-3.5-turbo", temperature=1):
