@@ -15,11 +15,12 @@ class ChatBot:
             chat_bot_response = get_completion_from_messages(context)  # 使用 context 而不是 context_queue
             self.context_queue.append({'role': 'assistant', 'content': f"{chat_bot_response}"})
         # self.context_queue.append({'role': 'assistant', 'content': f"{chat_bot_response}"})
+        #     yield chat_bot_response,self.context_queue  # 流式输出的核心------
         else:
             self.context_queue.append({'role': 'user', 'content': f"{self.user_text}"})
             chat_bot_response = get_completion_from_messages(list(self.context_queue))  # 使用 context 而不是 context_queue
             self.context_queue.append({'role': 'assistant', 'content': f"{chat_bot_response}"})
-
+            # yield chat_bot_response,self.context_queue  # 流式输出的核心-------
         self.event.set()  # 设置事件，通知 thread_2 可以开始运行
         if len(self.context_queue) >= MAX_SIZE:
             user_or_assistant_count = 0

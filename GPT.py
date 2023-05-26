@@ -19,3 +19,14 @@ def get_completion(prompt):
         temperature=0,
     )
     return response.choices[0].text
+
+def get_text_to_speech(text):
+    response = openai.Completion.create(
+        engine = "dall-e-2-musk",
+        prompt = f"convert the following text to speech: {text}",
+        max_tokens = 1024,
+        n = 1,
+        stop = None,
+        temperature = 0.7
+    )
+    return response.choices[0].audio_content
