@@ -1,3 +1,4 @@
+from GPT import get_completion_from_messages
 from thread1 import Thread1
 from thread2 import Thread2
 from collections import deque
@@ -7,8 +8,8 @@ import random
 import threading
 import os
 
-os.environ['FLASK_RUN_HOST'] = '23.251.61.213'
-os.environ['FLASK_RUN_PORT'] = '9090'
+# os.environ['FLASK_RUN_HOST'] = '23.251.61.213'
+# os.environ['FLASK_RUN_PORT'] = '9090'
 
 app = Flask(__name__)
 
@@ -188,6 +189,6 @@ if __name__ == '__main__':
 
     event = threading.Event()
 
-    # app.run('127.0.0.1', '9090')
+    app.run('127.0.0.1', '9090')
 
-    app.run(host='0.0.0.0', port=9090)
+    # app.run(host='0.0.0.0', port=9090)
