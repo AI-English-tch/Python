@@ -8,8 +8,8 @@ import random
 import threading
 import os
 import tts
-# os.environ['FLASK_RUN_HOST'] = '23.251.61.213'
-# os.environ['FLASK_RUN_PORT'] = '9090'
+os.environ['FLASK_RUN_HOST'] = '23.251.61.213'
+os.environ['FLASK_RUN_PORT'] = '9090'
 
 app = Flask(__name__)
 
@@ -52,9 +52,11 @@ def ai_teacher():  # put application's code here
         t2.join()
 
         chat_bot_response = t1.result
-        tts.text_to_audio(text=chat_bot_response)
+        # tts.text_to_audio(text=chat_bot_response)
         context_dict[token] = t1.queue
         assistant_bot_response = t2.result
+        global assistant_bot_current
+        assistant_bot_current = assistant_bot_response
         # # 前端传输机器人和用户发的言
         # history_queue.append({'role': 'assistant', 'content': f"{chat_bot_response}"})
         # history_queue.append({'role': 'user', 'content': f"{user_text}"})
@@ -63,27 +65,27 @@ def ai_teacher():  # put application's code here
         # context_dict[token] = history_queue
 
 
-        def generate():
+        # def generate():
+        #
+        #     for chat_bot_response_stream in chat_bot_response:
+        #         yield jsonify({
+        #             "code": 0,
+        #             "data": {
+        #                 "chat": chat_bot_response_stream,
+        #                 "check": assistant_bot_response
+        #             }
+        #         }) + '\n'  # 首先更新了ai_teacher函数来处理Thread1返回的生成器结果。然后，我将返回值从直接返回一个JSON响应改为返回一个流式响应。在Flask中，可以使用Response对象来创建一个流式响应              Response对象接受一个生成器作为参数，这个生成器在每次有新的数据可供发送时yield数据。在我们的例子中，这个生成器在每次聊天机器人有新的响应时yield一个JSON对象。----------
+        #
+        # return Response(generate(), mimetype='text/event-stream')
 
-            for chat_bot_response_stream in chat_bot_response:
-                yield jsonify({
-                    "code": 0,
-                    "data": {
-                        "chat": chat_bot_response_stream,
-                        "check": assistant_bot_response
-                    }
-                }) + '\n'  # 首先更新了ai_teacher函数来处理Thread1返回的生成器结果。然后，我将返回值从直接返回一个JSON响应改为返回一个流式响应。在Flask中，可以使用Response对象来创建一个流式响应              Response对象接受一个生成器作为参数，这个生成器在每次有新的数据可供发送时yield数据。在我们的例子中，这个生成器在每次聊天机器人有新的响应时yield一个JSON对象。----------
 
-        return Response(generate(), mimetype='text/event-stream')
-
-
-        # return jsonify({
-        #     "code": 0,
-        #     "data": {
-        #         "chat": chat_bot_response,
-        #         "check": assistant_bot_response
-        #     }
-        # })
+        return jsonify({
+            "code": 0,
+            "data": {
+                "chat": chat_bot_response,
+                "check": assistant_bot_response
+            }
+        })
 
     except Exception as e:
         return jsonify({
@@ -153,9 +155,10 @@ No matter what language I use.Reply me in English.现在请从第一个单词教
 
 @app.route('/assistant',methods=['POST','GET'])
 def ai_assistant():
-    token = request.headers.get('token')
+
     user_text = request.json.get('assistant')
     # context_assistant_queue.append({'role': 'system', 'content': f"{'prompt2'} "})
+    global assistant_bot_current
 
     context_assistant_queue.append({'role': 'assistant', 'content': f"{assistant_bot_current}"})
     context_assistant_queue.append({'role': 'user', 'content': f"{user_text}"})
@@ -173,6 +176,6 @@ if __name__ == '__main__':
 
     event = threading.Event()
 
-    app.run('127.0.0.1', '9090')
+    # app.run('127.0.0.1', '9090')
 
-    # app.run(host='0.0.0.0', port=9090)
+    app.run(host='0.0.0.0', port=9090)
