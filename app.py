@@ -55,6 +55,7 @@ def ai_teacher():  # put application's code here
         tts.text_to_audio(text=chat_bot_response)
         context_dict[token] = t1.queue
         assistant_bot_response = t2.result
+        global assistant_bot_current
         # # 前端传输机器人和用户发的言
         # history_queue.append({'role': 'assistant', 'content': f"{chat_bot_response}"})
         # history_queue.append({'role': 'user', 'content': f"{user_text}"})
