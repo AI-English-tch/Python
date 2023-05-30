@@ -159,7 +159,8 @@ def ai_assistant():
     user_text = request.json.get('assistant')
     # context_assistant_queue.append({'role': 'system', 'content': f"{'prompt2'} "})
     global assistant_bot_current
-
+    if assistant_bot_current == None:
+        assistant_bot_current = 'I am an assistant with a lot of knowledge of English'
     context_assistant_queue.append({'role': 'assistant', 'content': f"{assistant_bot_current}"})
     context_assistant_queue.append({'role': 'user', 'content': f"{user_text}"})
     context = list(context_assistant_queue)
