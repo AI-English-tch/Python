@@ -157,7 +157,7 @@ No matter what language I use.Reply me in English.现在请从第一个单词教
 def ai_assistant():
 
     user_text = request.json.get('assistant')
-    # context_assistant_queue.append({'role': 'system', 'content': f"{'prompt2'} "})
+    context_assistant_queue.append({'role': 'system', 'content': " 你是一名负责任的英语老师，请根据上下文友好地回答学生给你提出的问题 "})  
     global assistant_bot_current
     if assistant_bot_current == None:
         assistant_bot_current = 'I am an assistant with a lot of knowledge of English'
