@@ -1,5 +1,5 @@
 import openai
-openai.api_key = "....."
+openai.api_key = "------"
 
 
 def get_completion_from_messages(messages, model="gpt-3.5-turbo", temperature=1):
@@ -11,14 +11,6 @@ def get_completion_from_messages(messages, model="gpt-3.5-turbo", temperature=1)
     return response.choices[0].message["content"]
 
 
-def get_completion(prompt):
-    response = openai.Completion.create(
-        model="text-davinci-003",
-        prompt=prompt,
-        max_tokens=1500,
-        temperature=0,
-    )
-    return response.choices[0].text
 
 def get_text_to_speech(text):
     response = openai.Completion.create(

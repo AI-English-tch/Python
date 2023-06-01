@@ -1,8 +1,6 @@
-from threading import Event
+
 from GPT import get_completion_from_messages
 from config import MAX_SIZE
-
-
 
 class ChatBot:
     def __init__(self,context_queue,user_text,event):
@@ -34,3 +32,4 @@ class ChatBot:
                     count += 1
 
         return chat_bot_response,self.context_queue
+

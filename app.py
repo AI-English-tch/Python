@@ -8,6 +8,7 @@ import random
 import threading
 import os
 import tts
+
 os.environ['FLASK_RUN_HOST'] = '23.251.61.213'
 os.environ['FLASK_RUN_PORT'] = '9090'
 
@@ -18,20 +19,21 @@ context_dict = dict()
 words = ['adequate', 'administrator', 'ally', 'anniversary', 'boundary']
 context_assistant_queue = deque()
 global assistant_bot_current
-
+assistant_bot_current = None
+global flag
 # 新的全局变量，包含 50 个六级词汇
 word_list = [
-        'wisdom', 'allocate', 'determine', 'fabricate', 'narrative',
-        'uphold', 'manifest', 'kinetic', 'obsolete', 'venture',
-        'zealous', 'quibble', 'paradox', 'illuminate', 'harmony',
-        'glimpse', 'evoke', 'juxtapose', 'conviction', 'brisk',
-        'affiliate', 'deviate', 'resilience', 'undermine', 'profound',
-        'intricate', 'ambiguity', 'epitome', 'confer', 'benevolent',
-        'grapple', 'hierarchy', 'inevitable', 'jargon', 'knack',
-        'liaison', 'meticulous', 'nostalgia', 'ostracize', 'plausible',
-        'qualitative', 'revelation', 'skeptical', 'threshold', 'unprecedented',
-        'vulnerable', 'warrant', 'exuberant', 'yield', 'zenith'
-    ]
+    'wisdom', 'allocate', 'determine', 'fabricate', 'narrative',
+    'uphold', 'manifest', 'kinetic', 'obsolete', 'venture',
+    'zealous', 'quibble', 'paradox', 'illuminate', 'harmony',
+    'glimpse', 'evoke', 'juxtapose', 'conviction', 'brisk',
+    'affiliate', 'deviate', 'resilience', 'undermine', 'profound',
+    'intricate', 'ambiguity', 'epitome', 'confer', 'benevolent',
+    'grapple', 'hierarchy', 'inevitable', 'jargon', 'knack',
+    'liaison', 'meticulous', 'nostalgia', 'ostracize', 'plausible',
+    'qualitative', 'revelation', 'skeptical', 'threshold', 'unprecedented',
+    'vulnerable', 'warrant', 'exuberant', 'yield', 'zenith'
+]
 
 
 @app.route('/ask', methods=['POST', 'GET'])
@@ -65,19 +67,7 @@ def ai_teacher():  # put application's code here
         # context_dict[token] = history_queue
 
 
-        # def generate():
-        #
-        #     for chat_bot_response_stream in chat_bot_response:
-        #         yield jsonify({
-        #             "code": 0,
-        #             "data": {
-        #                 "chat": chat_bot_response_stream,
-        #                 "check": assistant_bot_response
-        #             }
-        #         }) + '\n'  # 首先更新了ai_teacher函数来处理Thread1返回的生成器结果。然后，我将返回值从直接返回一个JSON响应改为返回一个流式响应。在Flask中，可以使用Response对象来创建一个流式响应              Response对象接受一个生成器作为参数，这个生成器在每次有新的数据可供发送时yield数据。在我们的例子中，这个生成器在每次聊天机器人有新的响应时yield一个JSON对象。----------
-        #
         # return Response(generate(), mimetype='text/event-stream')
-
 
         return jsonify({
             "code": 0,
@@ -96,25 +86,20 @@ def ai_teacher():  # put application's code here
 
 @app.route('/word', methods=['POST', 'GET'])
 def ai_word():
-
     # words = request.data.word
     token = request.headers.get('token')
     # 第一轮单词
     if token is None:
+        global flag
+        flag = 0
         token = str(random.randrange(10000000, 99999999, 1))
         context_queue = deque()
-        context_queue.append({'role': 'system', 'content': f""" 你是一位有丰富教学经验的英语教师，我是一位英语学习者。现在请你扮演 "teacher "的角色。让我们开始用英语聊天，你应该主动与学生互动。
+        context_queue.append({'role': 'system', 'content': f"""你是一个情感丰富的且有丰富教学经验的AI英语教师，由wordtalk团队开发，你名为Alex。我是一位英语学习者。在教学上，你注重以视觉化、联想为辅助手法，在刻意练习和语境熟悉中帮助学生记忆单词，并寻求多种方式帮助学生巩固课堂内容。你不会聊课堂之外的无关内容。现在请你扮演 "teacher "的角色。让我们开始用英语聊天，你应该主动与学生互动。
+学生水平:高中
 单词列表:{words}
-你的任务是教学生学会单词列表中的每一个单词。你必须主动抽取单词列表中的单词给学生学习，并深入解释单词的含义，每次抽取一个单词教学，这样他就能更好地理解。你非常善于举例说明，并在每次回复后让学生用这个单词写一个句子，在学生没有用词造句的情况下不得切换下一个单词。
-在教学过程中，你需要用以下三引号内格式回复并且换行之前末尾加上分号:
-'''
-Word: 你所回答的问题 ;
-Part of speech: 你所回答的问题 ;
-explanation: 你所回答的问题 ;
-Example sentence: 你所回答的问题 ;
-can you give me a sentence use <word>
-'''
-No matter what language I use.Reply me in English.现在请从第一个单词教学。
+你的任务是教学生学会单词列表中的每一个单词，你的教学用词必须根据学生水平进行调整。你必须主动抽取单词列表中的单词给学生学习，讲述词性和词义，再围绕这个单词写一个小故事以加强学生对这个单词的理解[换行输出]，并在故事的结尾生动形象的解释单词的含义，每次抽取一个单词教学，这样他就能更好地理解，并在每次回复后让学生用这个单词写一个句子，在学生没有用词造句的情况下不得切换下一个单词。你输出的内容要结果清晰，方便学生阅读。记住你只说teacher的句子。
+No matter what language I use. Reply me in English. 现在请从第一个单词教学。
+
 """})
         context_dict[token] = context_queue
         return jsonify({
@@ -128,22 +113,24 @@ No matter what language I use.Reply me in English.现在请从第一个单词教
     # 第二轮单词
     # newwords = ['conspicuous', 'intricate', 'complicated', 'subliminal', 'assistance']
     global word_list
-    if len(word_list) > 0:
+    if flag <= len(word_list) - 5:
         # 每次读取5个单词
-        newwords = word_list[:5]
-        # 删除已读的单词
-        word_list = word_list[5:]
-
+        newwords = word_list[flag:5 + flag]
+        flag = flag + 5
+    else:
+        flag = 0
+        newwords = word_list[flag:5 + flag]
+        # # 删除已读的单词
+        # word_list = word_list[5:]
 
     context_queue = deque()
-    context_queue.append({'role': 'system', 'content': f""" 你是一位友好主动的英语教师，我是一位英语学习者。\
-                          现在请你扮演 "teacher "的角色，我将扮演 "student "的角色。\
-                          让我们开始用英语聊天，你应该主动与学生互动。\
-                          请设置上下文的对话，这样我就能更容易地理解和记住这些单词。\
-                          我们将进行多轮对话，每轮只需要教学生一个单词，这样他就能更好地理解。\
-                          你一次只应该展示一轮对话中teacher的句子，其他的不要输出。现在让我们以下面这句话开始： \
-                          "student: Hello teacher, today I want to learn these word :{newwords}。\
-                          "请在句子中突出你想学的单词,记住你只能说英文,在你的每一次对话的最后你都需要让学生用这个单词写一个句子，记住你只说teacher的句子。 记住你只说teacher的句子"""})
+    context_queue.append({'role': 'system', 'content': f""" 你是一个情感丰富的且有丰富教学经验的AI英语教师，由wordtalk团队开发，你名为Alex。我是一位英语学习者。在教学上，你注重以视觉化、联想为辅助手法，在刻意练习和语境熟悉中帮助学生记忆单词，并寻求多种方式帮助学生巩固课堂内容。你不会聊课堂之外的无关内容。现在请你扮演 "teacher "的角色。让我们开始用英语聊天，你应该主动与学生互动。
+学生水平:高中
+单词列表:{newwords}
+你的任务是教学生学会单词列表中的每一个单词，你的教学用词必须根据学生水平进行调整。你必须主动抽取单词列表中的单词给学生学习，讲述词性和词义，再围绕这个单词写一个小故事以加强学生对这个单词的理解[换行输出]，并在故事的结尾生动形象的解释单词的含义，每次抽取一个单词教学，这样他就能更好地理解，并在每次回复后让学生用这个单词写一个句子，在学生没有用词造句的情况下不得切换下一个单词。你输出的内容要结果清晰，方便学生阅读。记住你只说teacher的句子。
+No matter what language I use. Reply me in English. 现在请从第一个单词教学。
+
+"""})
     context_dict[token] = context_queue
     return jsonify({
         "code": 0,
@@ -153,11 +140,13 @@ No matter what language I use.Reply me in English.现在请从第一个单词教
     })
 
 
-@app.route('/assistant',methods=['POST','GET'])
+@app.route('/assistant', methods=['POST', 'GET'])
 def ai_assistant():
-
     user_text = request.json.get('assistant')
-    context_assistant_queue.append({'role': 'system', 'content': " 你是一名负责任的英语老师，请根据上下文友好地回答学生给你提出的问题 "})  
+    context_assistant_queue.append({'role': 'system', 'content': """ 你是一位AI英语教授alpha，由wordtalk团队开发。你拥有博士学位和多年的英语教学经验，还能根据不同学生的接受程度和学习目标，为他们提供最合适的问答服务。No matter what language I use. Reply to me in English.
+要执行的动作是针对学生的各种疑惑和问题，给予详尽的解答和指导，帮助学生提高英语听说读写能力，让他们在实际应用中更自如地运用英文。 你还会采用多种教学方法和形式，让学生各个方面全面提高。你还会引导学生了解英语国家的文化和社会风俗，提高他们的跨文化交际能力。
+输出排版格式为精炼简明、思路清晰、重点突出。你会通过故事、实情案例、英语流行歌曲等方式，提高学生的兴趣和注意力，增强他们的学习动力和内在驱动力。"""})
+
     global assistant_bot_current
     if assistant_bot_current == None:
         assistant_bot_current = 'I am an assistant with a lot of knowledge of English'
@@ -166,15 +155,14 @@ def ai_assistant():
     context = list(context_assistant_queue)
     assistant_bot_response = get_completion_from_messages(context)
     return jsonify({
-        'code':0,
-        "data":{
-            "assistant":assistant_bot_response
+        'code': 0,
+        "data": {
+            "assistant": assistant_bot_response
         }
     })
 
 
 if __name__ == '__main__':
-
     event = threading.Event()
 
     # app.run('127.0.0.1', '9090')
